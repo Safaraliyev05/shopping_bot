@@ -3,14 +3,15 @@ from django.db.models import Model, BigIntegerField, CharField, BooleanField, Fo
 
 
 class User(Model):
-    telegram_id = BigIntegerField(unique=True)
+    # telegram_id = BigIntegerField(unique=True)
     full_name = CharField(max_length=255)
     phone_number = CharField(max_length=20)
-    language = CharField(max_length=2, choices=[('uz', 'Uzbek'), ('ru', 'Russian')], default='uz')
-    is_blocked = BooleanField(default=False)
+
+    # language = CharField(max_length=2, choices=[('uz', 'Uzbek'), ('ru', 'Russian')], default='uz')
+    # is_blocked = BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.full_name} ({self.telegram_id})"
+        return f"{self.full_name}"
 
 
 class Category(Model):
