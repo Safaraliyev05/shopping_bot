@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.models import User, Category, Product, ProductColor, Cart, CartItem, Order, OrderItem
+from apps.models import User, Category, Product, ProductColor, Cart, CartItem, Order, OrderItem, ProductImage
 
 
 @admin.register(User)
@@ -15,6 +15,11 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(ProductImage)
+class ProductColorImageAdmin(admin.ModelAdmin):
     pass
 
 

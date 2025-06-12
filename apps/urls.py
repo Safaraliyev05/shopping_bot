@@ -15,8 +15,10 @@ from apps.views import (
 
     # Category
     CategoryListView, CategoryDetailView, CategoryCreateView, CategoryUpdateView, CategoryDeleteView, UserListView,
-    UserDetailView, UserCreateView, UserUpdateView, UserDeleteView,
+    UserDetailView, UserCreateView, UserUpdateView, UserDeleteView, ProductImageListView,
+    ProductImageCreateView, ProductImageUpdateView, ProductImageDeleteView,
 )
+from apps.views.product_image import ProductImageDetailView
 
 urlpatterns = [
     # Product endpoints
@@ -55,5 +57,13 @@ urlpatterns = [
     path('users/create/', UserCreateView.as_view(), name='user-create'),
     path('users/<int:pk>/update/', UserUpdateView.as_view(), name='user-update'),
     path('users/<int:pk>/delete/', UserDeleteView.as_view(), name='user-delete'),
+
+    path('product-color-images/', ProductImageListView.as_view(), name='ProductImage-list'),
+    path('product-color-images/<int:pk>/', ProductImageDetailView.as_view(), name='ProductImage-detail'),
+    path('product-color-images/create/', ProductImageCreateView.as_view(), name='ProductImage-create'),
+    path('product-color-images/<int:pk>/update/', ProductImageUpdateView.as_view(),
+         name='ProductImage-update'),
+    path('product-color-images/<int:pk>/delete/', ProductImageDeleteView.as_view(),
+         name='ProductImage-delete'),
 
 ]

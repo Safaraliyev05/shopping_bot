@@ -1,4 +1,4 @@
-from django.db.models import Model, BigIntegerField, CharField, BooleanField, ForeignKey, CASCADE, ManyToManyField, \
+from django.db.models import Model, CharField, BooleanField, ForeignKey, CASCADE, ManyToManyField, \
     ImageField, OneToOneField, PositiveIntegerField, DateTimeField, DecimalField
 
 
@@ -27,10 +27,17 @@ class Product(Model):
     name_uz = CharField(max_length=255)
     name_ru = CharField(max_length=255)
     categories = ManyToManyField(Category, related_name='products')
-    main_image = ImageField(upload_to='products/')
 
     def __str__(self):
         return self.name_uz
+
+
+class ProductImage(Model):
+    product = ForeignKey(Product, on_delete=CASCADE, related_name='images')
+    image = ImageField(upload_to='products/')
+
+    def __str__(self):
+        return f"Image for {self.product.name_uz}"
 
 
 class ProductColor(Model):
@@ -40,14 +47,6 @@ class ProductColor(Model):
 
     def __str__(self):
         return f"{self.product.name_uz} - {self.color_name}"
-
-
-class ProductColorImage(Model):
-    product_color = ForeignKey(ProductColor, on_delete=CASCADE, related_name='images')
-    image = ImageField(upload_to='product_colors/')
-
-    def __str__(self):
-        return f"{self.product_color}"
 
 
 class Cart(Model):

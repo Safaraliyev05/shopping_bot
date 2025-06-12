@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.models import Category, Product, ProductColor, ProductColorImage, Cart, CartItem, Order, OrderItem, User
+from apps.models import Category, Product, ProductColor, ProductImage, Cart, CartItem, Order, OrderItem, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -15,14 +15,14 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ProductColorImageSerializer(serializers.ModelSerializer):
+class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductColorImage
+        model = ProductImage
         fields = '__all__'
 
 
 class ProductColorSerializer(serializers.ModelSerializer):
-    images = ProductColorImageSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProductColor
