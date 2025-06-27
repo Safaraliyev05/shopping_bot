@@ -15,7 +15,7 @@ TOKEN = "7063469997:AAEziSALHUctBBljOLdNYQiQw2Y67bYQWws"
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 dp.include_router(router)
-dp.include_router(product_router    )
+dp.include_router(product_router)
 
 
 class Register(StatesGroup):
@@ -84,10 +84,17 @@ async def process_phone(message: Message, state: FSMContext):
     await state.update_data(phone_number=phone)
 
     if lang == "uz":
-        await message.answer("Kategoriyani tanlang:", reply_markup=category_keyboard)
+        await message.answer_photo(
+            photo="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg",
+            caption="Kategoriya",
+            reply_markup=category_keyboard,
+        )
     else:
-        await message.answer("Выберите категорию:", reply_markup=category_keyboard)
-
+        await message.answer_photo(
+            photo="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg",
+            caption="Kategoriya",
+            reply_markup=category_keyboard,
+        )
     await state.set_state(Register.shop_category)
 
 
@@ -100,11 +107,17 @@ async def process_shop_category(message: Message, state: FSMContext):
     await state.update_data(shop_category=selected)
 
     if lang == "uz":
-        await message.answer(f"{selected} kategoriyasi tanlandi. Ro'yxat yakunlandi ✅",
-                             reply_markup=ReplyKeyboardRemove())
+        await message.answer_photo(
+            photo="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg",
+            caption="Kategoriya",
+            reply_markup=category_keyboard,
+        )
     else:
-        await message.answer(f"Вы выбрали категорию: {selected}. Регистрация завершена ✅",
-                             reply_markup=ReplyKeyboardRemove())
+        await message.answer_photo(
+            photo="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg",
+            caption="Kategoriya",
+            reply_markup=category_keyboard,
+        )
 
     await state.clear()
 
