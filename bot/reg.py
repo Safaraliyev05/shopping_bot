@@ -9,13 +9,13 @@ from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKey
 
 from bot.category_file.category import router
 from bot.category_file.keyboards import category_keyboard
-from bot.product_file.p_keyboard import product_router
+from bot.product_file.product import product_router
 
 TOKEN = "7063469997:AAEziSALHUctBBljOLdNYQiQw2Y67bYQWws"
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 dp.include_router(router)
-dp.include_router(product_router)
+dp.include_router(product_router    )
 
 
 class Register(StatesGroup):
