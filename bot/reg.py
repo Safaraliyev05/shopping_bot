@@ -7,22 +7,19 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
-from bot.category_file.category import router
-from bot.category_file.keyboards import category_keyboard
-from bot.product_file.product import product_router
+from bot.category_file.category import category_router
+from bot.category_file.keyboards import build_root_category_keyboard
 
 TOKEN = "7063469997:AAEziSALHUctBBljOLdNYQiQw2Y67bYQWws"
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-dp.include_router(router)
-dp.include_router(product_router)
+dp.include_router(category_router)
 
 
 class Register(StatesGroup):
     language = State()
     full_name = State()
     phone_number = State()
-    shop_category = State()
 
 
 @dp.message(Command("start"))
@@ -83,40 +80,19 @@ async def process_phone(message: Message, state: FSMContext):
 
     await state.update_data(phone_number=phone)
 
-    if lang == "uz":
-        await message.answer_photo(
-            photo="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg",
-            caption="Kategoriya",
-            reply_markup=category_keyboard,
-        )
-    else:
-        await message.answer_photo(
-            photo="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg",
-            caption="Kategoriya",
-            reply_markup=category_keyboard,
-        )
-    await state.set_state(Register.shop_category)
-
-
-@dp.message(Register.shop_category, F.text)
-async def process_shop_category(message: Message, state: FSMContext):
-    selected = message.text
-    data = await state.get_data()
-    lang = data.get("language", "uz")
-
-    await state.update_data(shop_category=selected)
+    keyboard = await build_root_category_keyboard()
 
     if lang == "uz":
         await message.answer_photo(
             photo="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg",
-            caption="Kategoriya",
-            reply_markup=category_keyboard,
+            caption="Iltimos, kategoriyani tanlang:",
+            reply_markup=keyboard,
         )
     else:
         await message.answer_photo(
             photo="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg",
-            caption="Kategoriya",
-            reply_markup=category_keyboard,
+            caption="Пожалуйста, выберите категорию:",
+            reply_markup=keyboard,
         )
 
     await state.clear()
