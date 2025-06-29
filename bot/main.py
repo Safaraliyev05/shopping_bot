@@ -1,19 +1,24 @@
 import asyncio
 import logging
+import os
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from dotenv import load_dotenv
 
 from bot.category_file.category import category_router
 from bot.category_file.keyboards import build_root_category_keyboard
+from bot.product_file.shop import product_router
 
-TOKEN = "7063469997:AAEziSALHUctBBljOLdNYQiQw2Y67bYQWws"
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 dp.include_router(category_router)
+dp.include_router(product_router)
 
 
 class Register(StatesGroup):
