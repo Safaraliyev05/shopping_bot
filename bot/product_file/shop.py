@@ -1,85 +1,68 @@
 from aiogram import Router, types, F
-from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.product_file.products import get_all_product_data
+from bot.product_file.products import get_products_by_category
 
 product_router = Router()
-product_list = get_all_product_data()
+product_cache = {}
 
 
-def product_carousel_keyboard(index: int) -> InlineKeyboardMarkup:
+def product_carousel_keyboard(subcat_id: int, index: int) -> InlineKeyboardMarkup:
+    product_list = product_cache.get(subcat_id, [])
     total = len(product_list)
     prev_index = (index - 1) % total
     next_index = (index + 1) % total
 
     kb = InlineKeyboardBuilder()
     kb.row(
-        InlineKeyboardButton(text="⬅️ Prev", callback_data=f"carousel:{prev_index}"),
+        InlineKeyboardButton(text="⬅️ Prev", callback_data=f"carousel:{subcat_id}:{prev_index}"),
         InlineKeyboardButton(text="🛒 Add", callback_data=f"add:{product_list[index]['id']}"),
-        InlineKeyboardButton(text="➡️ Next", callback_data=f"carousel:{next_index}")
+        InlineKeyboardButton(text="➡️ Next", callback_data=f"carousel:{subcat_id}:{next_index}")
     )
     return kb.as_markup()
 
 
-@product_router.message(Command("product"))
-async def show_first_product(message: types.Message):
-    index = 0
-    product = product_list[index]
-    text = f"📦 <b>{product['name']}</b>\n💰 <b>Price:</b> ${product['price']}"
-    await message.answer(text, reply_markup=product_carousel_keyboard(index), parse_mode='HTML')
+@product_router.callback_query(F.data.startswith("subcategory_"))
+async def show_products_for_subcategory(callback: types.CallbackQuery):
+    subcat_id = int(callback.data.split("_")[1])
+    product_list = await get_products_by_category(subcat_id)
+
+    if not product_list:
+        await callback.answer("Bu kategoriyada mahsulotlar yo'q.", show_alert=True)
+        return
+
+    product_cache[subcat_id] = product_list
+    product = product_list[0]
+    text = f"📦 <b>{product['name']}</b>\n💰 <b>Narx:</b> ${product['price']}"
+    await callback.message.edit_caption(
+        caption=text,
+        reply_markup=product_carousel_keyboard(subcat_id, 0),
+        parse_mode='HTML'
+    )
+    await callback.answer()
 
 
 @product_router.callback_query(F.data.startswith("carousel:"))
 async def handle_carousel(callback: types.CallbackQuery):
-    index = int(callback.data.split(":")[1])
-    product = product_list[index]
-    text = f"📦 <b>{product['name']}</b>\n💰 <b>Price:</b> ${product['price']}"
-    await callback.message.edit_text(text, reply_markup=product_carousel_keyboard(index), parse_mode='HTML')
-    await callback.answer()
+    try:
+        _, subcat_id, index = callback.data.split(":")
+        subcat_id = int(subcat_id)
+        index = int(index)
+    except (ValueError, IndexError):
+        return await callback.answer("Xatolik yuz berdi.")
 
-# def build_category_carousel(products, index: int, cat_id: int) -> InlineKeyboardMarkup:
-#     total = len(products)
-#     prev_index = (index - 1) % total
-#     next_index = (index + 1) % total
-#
-#     builder = InlineKeyboardBuilder()
-#     builder.row(
-#         InlineKeyboardButton(text="⬅️", callback_data=f"cat_car:{cat_id}:{prev_index}"),
-#         InlineKeyboardButton(text="🛒 Add", callback_data=f"add:{products[index]['id']}"),
-#         InlineKeyboardButton(text="➡️", callback_data=f"cat_car:{cat_id}:{next_index}")
-#     )
-#     return builder.as_markup()
-#
-# @product_router.callback_query(F.data.startswith("cat_car:"))
-# async def handle_category_carousel(callback: types.CallbackQuery):
-#     _, cat_id, index = callback.data.split(":")
-#     cat_id = int(cat_id)
-#     index = int(index)
-#
-#     products = await get_products_by_category_id(cat_id)
-#
-#     if not products:
-#         await callback.message.answer("❌ Mahsulot topilmadi.")
-#         await callback.answer()
-#         return
-#
-#     product = products[index]
-#     new_text = f"📦 <b>{product['name']}</b>\n💰 <b>Price:</b> ${product['price']}"
-#     new_markup = build_category_carousel(products, index, cat_id)
-#
-#     # ✅ Check if content is the same
-#     if callback.message.text == new_text:
-#         await callback.answer()  # Do nothing
-#         return
-#
-#     try:
-#         await callback.message.edit_text(
-#             new_text, reply_markup=new_markup, parse_mode='HTML'
-#         )
-#     except TelegramBadRequest as e:
-#         if "message is not modified" in str(e):
-#             await callback.answer()
-#         else:
-#             raise
+    product_list = product_cache.get(subcat_id, [])
+
+    if not product_list:
+        await callback.answer("Mahsulotlar topilmadi.", show_alert=True)
+        return
+
+    product = product_list[index]
+    text = f"📦 <b>{product['name']}</b>\n💰 <b>Narx:</b> ${product['price']}"
+    await callback.message.edit_caption(
+        caption=text,
+        reply_markup=product_carousel_keyboard(subcat_id, index),
+        parse_mode='HTML'
+    )
+    await callback.answer()
