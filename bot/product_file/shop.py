@@ -1,7 +1,9 @@
 from aiogram import Router, types, F
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from bot.category_file.keyboards import build_subcategory_keyboard, get_parent_id_of_category, \
+    build_root_category_keyboard
 from bot.product_file.products import get_products_by_category
 
 product_router = Router()
@@ -19,6 +21,9 @@ def product_carousel_keyboard(subcat_id: int, index: int) -> InlineKeyboardMarku
         InlineKeyboardButton(text="⬅️ Prev", callback_data=f"carousel:{subcat_id}:{prev_index}"),
         InlineKeyboardButton(text="🛒 Add", callback_data=f"add:{product_list[index]['id']}"),
         InlineKeyboardButton(text="➡️ Next", callback_data=f"carousel:{subcat_id}:{next_index}")
+    )
+    kb.row(
+        InlineKeyboardButton(text="🔙 Ortga", callback_data=f"back_to_subcategory:{subcat_id}")
     )
     return kb.as_markup()
 
@@ -64,5 +69,30 @@ async def handle_carousel(callback: types.CallbackQuery):
         caption=text,
         reply_markup=product_carousel_keyboard(subcat_id, index),
         parse_mode='HTML'
+    )
+    await callback.answer()
+
+
+@product_router.callback_query(F.data.startswith("back_to_subcategory:"))
+async def back_to_subcategory(callback: CallbackQuery):
+    try:
+        subcat_id = int(callback.data.split(":")[1])
+    except (IndexError, ValueError):
+        return await callback.answer("Xatolik yuz berdi.")
+
+    parent_id = await get_parent_id_of_category(subcat_id)
+
+    if parent_id is None:
+        keyboard = await build_root_category_keyboard()
+        await callback.message.edit_caption(
+            caption="Kategoriya tanlang:",
+            reply_markup=keyboard,
+        )
+        return
+
+    keyboard = await build_subcategory_keyboard(parent_id)
+    await callback.message.edit_caption(
+        caption="Iltimos, subkategoriyani tanlang:",
+        reply_markup=keyboard,
     )
     await callback.answer()

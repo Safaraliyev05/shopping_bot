@@ -52,3 +52,12 @@ async def build_subcategory_keyboard(parent_id):
     ])
 
     return InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+
+
+@sync_to_async
+def get_parent_id_of_category(category_id):
+    try:
+        category = Category.objects.get(id=category_id)
+        return category.parent_id
+    except Category.DoesNotExist:
+        return None
